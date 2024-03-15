@@ -1,4 +1,4 @@
-<p align="center">
+<p align="left">
 	<img src = "https://img.shields.io/badge/Supports-1.7.10-%3Cbrightgreen%3E">
 	<img src = "https://img.shields.io/badge/-Easy%20to%20use-yellow">
 </p>
