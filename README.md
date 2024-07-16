@@ -5,6 +5,8 @@
 
 # XeDisguise
 XeDisguise is open-source plugin which supports 1.7.10 spigot.
+[Update 2024/07/17: There are some bugs since I forgot to commit the updates.
+use at your own risk)
 
 ### Credit
 1. Creaxx (Skin & UUIDFetcher): ``https://github.com/CreaxxOG``
