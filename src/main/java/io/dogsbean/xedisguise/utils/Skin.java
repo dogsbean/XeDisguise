@@ -1,5 +1,6 @@
 package io.dogsbean.xedisguise.utils;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.AllArgsConstructor;
@@ -20,8 +21,8 @@ import java.util.concurrent.CompletableFuture;
 @Getter @Setter
 @AllArgsConstructor
 public class Skin {
-    public static final String PLAYER_ID_API_URL = "https://api.mojang.com/users/profiles/minecraft/";
-    public static final String MOJANG_API = "https://sessionserver.mojang.com/session/minecraft/profile/";
+    public static final String ID_API = "https://api.mojang.com/users/profiles/minecraft/";
+    public static final String WEB_API = "https://sessionserver.mojang.com/session/minecraft/profile/";
     public static final Map<String, Skin> SKINS = new HashMap<>();
 
     public static Skin DEFAULT_SKIN = new Skin("", "", "");
@@ -40,22 +41,26 @@ public class Skin {
             String signature = null;
 
             try {
-                String idChecker = PLAYER_ID_API_URL + name;
+                String idChecker = ID_API + name;
                 URL urlChecker = new URL(idChecker);
 
                 InputStreamReader reader = new InputStreamReader(urlChecker.openStream());
-                JsonObject object = JsonParser.parseReader(reader).getAsJsonObject();
+                JsonParser parser = new JsonParser();
+                JsonElement element = parser.parse(reader);
+                JsonObject object = element.getAsJsonObject();
                 String id = object.get("id").getAsString();
 
-                String link = MOJANG_API + id + "?unsigned=false";
+                String link = WEB_API + id + "?unsigned=false";
                 urlChecker = new URL(link);
                 reader = new InputStreamReader(urlChecker.openStream());
-                JsonObject properties = JsonParser.parseReader(reader).getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
+                element = parser.parse(reader);
+                JsonObject properties = element.getAsJsonObject().get("properties").getAsJsonArray().get(0).getAsJsonObject();
 
                 texture = properties.get("value").getAsString();
                 signature = properties.get("signature").getAsString();
                 reader.close();
             } catch (Exception ex) {
+                ex.printStackTrace();
                 return Skin.DEFAULT_SKIN;
             }
             Skin skin = new Skin(name, texture, signature);
