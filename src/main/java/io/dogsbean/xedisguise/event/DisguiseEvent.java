@@ -11,12 +11,14 @@ public class DisguiseEvent extends Event {
     private final Player player;
     private final String originalName;
     private final String disguisedName;
+    private String skin;
     private final boolean disguised;
 
-    public DisguiseEvent(Player player, String originalName, String disguisedName, boolean disguised) {
+    public DisguiseEvent(Player player, String originalName, String disguisedName, String skin, boolean disguised) {
         this.player = player;
         this.originalName = originalName;
         this.disguisedName = disguisedName;
+        this.skin = skin;
         this.disguised = disguised;
     }
 

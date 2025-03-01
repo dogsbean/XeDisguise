@@ -30,22 +30,17 @@ public class DisguiseListener implements Listener {
         Player player = e.getPlayer();
         String originalName = e.getOriginalName();
         String disguiseName = e.getDisguisedName();
-        for (Player onlinePlayers: Bukkit.getOnlinePlayers()) {
-            if (onlinePlayers.hasPermission(XePermissions.CAN_SEE_OTHERS_DISGUISE)) {
-                onlinePlayers.sendMessage(ChatColor.BLUE + "[XeDisguise] " + ChatColor.GREEN + originalName + ChatColor.YELLOW + " has disguised as " + ChatColor.GREEN + disguiseName + ChatColor.YELLOW + ".");
-            }
-        }
         DisguiseHandler disguiseHandler = new DisguiseHandler(plugin);;
         player.setCustomName(player.getName());
         player.setPlayerListName(disguiseName);
         player.setDisplayName(disguiseName);
-        Skin.getSkinByName(disguiseName).thenAccept(skin -> {
+        Skin.getSkinByName(e.getSkin()).thenAccept(skin -> {
             if (skin != null && !skin.equals(Skin.DEFAULT_SKIN)) {
                 disguiseHandler.setSkin(player, skin);
             }
         });
 
-        disguiseHandler.fetchName(player, disguiseName);
+        disguiseHandler.fetchName(player, disguiseName, false);
         Disguise disguise = new Disguise(player, originalName, disguiseName);
         plugin.getDisguiseManager().addDisguise(player, disguise);
     }
@@ -54,14 +49,7 @@ public class DisguiseListener implements Listener {
     public void onUnDisguise(UnDisguiseEvent e) {
         Player player = e.getPlayer();
         String originalName = e.getDisguise().getOriginalName();
-        String disguisedName = e.getDisguise().getDisguisedName();
-        for (Player onlinePlayers: Bukkit.getOnlinePlayers()) {
-            if (onlinePlayers.hasPermission(XePermissions.CAN_SEE_OTHERS_DISGUISE)) {
-                onlinePlayers.sendMessage(ChatColor.BLUE + "[XeDisguise] " + ChatColor.GREEN + originalName + ChatColor.GRAY + ChatColor.ITALIC + " (who disguised as " + ChatColor.RESET + ChatColor.GREEN + disguisedName + ChatColor.GRAY + ChatColor.ITALIC + ") just undisguised.");
-            }
-        }
         DisguiseHandler disguiseHandler = new DisguiseHandler(plugin);
-
         plugin.getDisguiseManager().removeDisguise(player);
 
         player.setCustomName(originalName);
@@ -71,42 +59,45 @@ public class DisguiseListener implements Listener {
         Skin.getSkinByName(originalName).thenAccept(skin -> {
             if (skin != null && !skin.equals(Skin.DEFAULT_SKIN)) {
                 disguiseHandler.setSkin(player, skin);
+            } else {
+                player.sendMessage("Failed to fetch skin or default skin used.");
             }
+        }).exceptionally(ex -> {
+            ex.printStackTrace();
+            player.sendMessage("An error occurred while fetching the skin.");
+            return null;
         });
 
-        disguiseHandler.fetchName(player, originalName);
+        disguiseHandler.fetchName(player, originalName, true);
     }
 
     @EventHandler
     public void onUnDisguised(UnDisguiseForceEvent e) {
         Disguise disguise = e.getDisguise();
         String originalName = disguise.getOriginalName();
-        String disguisedName = disguise.getDisguisedName();
-        for (Player onlinePlayers: Bukkit.getOnlinePlayers()) {
-            if (onlinePlayers.hasPermission(XePermissions.CAN_SEE_OTHERS_DISGUISE)) {
-                onlinePlayers.sendMessage(ChatColor.BLUE + "[XeDisguise] " + ChatColor.GREEN + originalName + ChatColor.GRAY + ChatColor.ITALIC + " (who disguised as " + ChatColor.RESET + ChatColor.GREEN + disguisedName + ChatColor.GRAY + ChatColor.ITALIC + ") just undisguised." + ChatColor.RESET + ChatColor.RED + " (DISCONNECTED)");
-            }
-        }
         Player originalPlayer = Bukkit.getPlayer(originalName);
         if (originalPlayer != null) {
             DisguiseHandler disguiseHandler = new DisguiseHandler(plugin);
 
-            // 1. 플레이어의 디스가이즈 정보를 제거
             plugin.getDisguiseManager().removeDisguise(originalPlayer);
 
-            // 2. 플레이어의 이름을 원래대로 설정
             originalPlayer.setCustomName(originalName);
             originalPlayer.setPlayerListName(originalName);
             originalPlayer.setDisplayName(originalName);
 
-            // 3. 플레이어의 스킨을 원래대로 설정
             Skin.getSkinByName(originalName).thenAccept(skin -> {
                 if (skin != null && !skin.equals(Skin.DEFAULT_SKIN)) {
                     disguiseHandler.setSkin(originalPlayer, skin);
+                } else {
+                    originalPlayer.sendMessage("Failed to fetch skin or default skin used.");
                 }
+            }).exceptionally(ex -> {
+                ex.printStackTrace();
+                originalPlayer.sendMessage("An error occurred while fetching the skin.");
+                return null;
             });
 
-            disguiseHandler.fetchName(originalPlayer, originalName);
+            disguiseHandler.fetchName(originalPlayer, originalName, true);
             originalPlayer.kickPlayer(ChatColor.RED + "You were kicked for un-disguising.");
         }
     }
