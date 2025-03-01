@@ -6,6 +6,9 @@
 # XeDisguise
 XeDisguise is open-source plugin which supports 1.7.10 spigot.
 
+# TODO
+Cancel all player events if player is in applyingTask
+
 ### Credit
 1. Creaxx (Skin & UUIDFetcher): ``https://github.com/CreaxxOG``
 2. AndyReckt (Skin & UUIDFetcher): ``https://github.com/AndyReckt/``
